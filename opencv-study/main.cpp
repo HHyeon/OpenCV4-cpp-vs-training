@@ -91,29 +91,13 @@ void apply_houghlines(Mat *src)
 	Mat edge;
 	Canny((*src), edge, edge_param1, edge_param2);
 
-	vector<Vec2f> lines;
-	HoughLines(edge, lines, 1, CV_PI / 180, 250);
-
+	vector<Vec4i> lines;
+	HoughLinesP(edge, lines, 1, CV_PI / 180, 160, 50, 5);
 
 	for (size_t i = 0; i < lines.size(); i++)
 	{
-		float r = lines[i][0];
-		float t = lines[i][1];
-		cout << "r : " << r << endl;
-		cout << "t : " << t << endl;
-		double cos_t = cos(t);
-		double sin_t = sin(t);
-		double x0 = r * cos_t;
-		double y0 = r * sin_t;
-		double alpha = 1000;
-
-		Point pt1(cvRound(x0 + alpha * (-sin_t)), cvRound(y0 + alpha * cos_t));
-		Point pt2(cvRound(x0 - alpha * (-sin_t)), cvRound(y0 - alpha * cos_t));
-		cout << "(" << pt1.x << ", " << pt1.y << "), (" << pt2.x << ", " << pt2.y << ")";
-		line(edge, pt1, pt2, Scalar::all(255), 2, LINE_AA);
+		line(edge, Point(lines[i][0], lines[i][1]), Point(lines[i][2], lines[i][3]), Scalar::all(255), 2, LINE_AA);
 	}
-
-	//line(edge, Point(10, 10), Point(100, 100), Scalar(255, 255, 255), 2, LINE_AA);
 
 	stringstream ss;
 	ss << "lines.size() : " << lines.size();
