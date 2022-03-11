@@ -95,16 +95,19 @@ void apply_houghlines(Mat *src)
 	vector<Vec4i> lines;
 	HoughLinesP(edge, lines, 1, CV_PI / 180, 160, 50, 5);
 
+	Mat colored_edge;
+	cvtColor(edge, colored_edge, COLOR_GRAY2BGR);
+
 	for (size_t i = 0; i < lines.size(); i++)
 	{
-		line(edge, Point(lines[i][0], lines[i][1]), Point(lines[i][2], lines[i][3]), Scalar::all(255), 2, LINE_AA);
+		line(colored_edge, Point(lines[i][0], lines[i][1]), Point(lines[i][2], lines[i][3]), Scalar(0,0,255), 2, LINE_AA);
 	}
 
 	stringstream ss;
 	ss << "lines.size() : " << lines.size();
 
-	putText(edge, ss.str(), Point(10, 30), 2, 1.0, Scalar::all(255));
-	imshow(window_name_edge_with_line, edge);
+	putText(colored_edge, ss.str(), Point(10, 30), 2, 1.0, Scalar::all(255));
+	imshow(window_name_edge_with_line, colored_edge);
 }
 
 void apply_edge_window(Mat *src)
