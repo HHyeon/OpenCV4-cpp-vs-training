@@ -1,64 +1,78 @@
 #include <stdio.h>
 #include <conio.h>
 #include <iostream>
+#include <sstream>
 #include <opencv2/opencv.hpp>
 #include <opencv2/video.hpp>
 
 using namespace std;
 using namespace cv;
 
+void on_trackbar_action1(int pos, void* userdata);
+void on_trackbar_action2(int pos, void* userdata);
+
 int main()
 {
-	cout << "CV_VERSION : " << CV_VERSION << endl;
+	Mat src;
+	src = imread("C:\\Users\\HYEON-desk\\Desktop\\ABX00051_01.iso_1000x750.jpg");
 
-	cv::VideoCapture cap("C:\\video.mp4");
-
-	if (!cap.isOpened())
+	if (src.empty())
 	{
-		cout << "mp4 open failed\n";
-	}
-	else
-	{
-		cout << "wid : " << cap.get(CAP_PROP_FRAME_WIDTH) << endl;
-		cout << "hei : " << cap.get(CAP_PROP_FRAME_HEIGHT) << endl;
-
-		Mat frame;
-
-		while (true)
-		{
-			cap >> frame;
-
-			if (frame.empty())
-				break;
-
-			imshow("frame", frame);
-
-			if (waitKey(10) == 'q')
-				break;
-
-		}
-
+		cerr << "imread failed" << endl;
+		return 1;
 	}
 
+	Mat edge;
+	Canny(src, edge, 150, 300);
+
+	namedWindow("window");
+	createTrackbar("edge_param1", "window", 0, 50, on_trackbar_action1, (void*)&src);
+	createTrackbar("edge_param2", "window", 0, 50, on_trackbar_action2, (void*)&src);
+	
+	Mat src_clone;
+	src.copyTo(src_clone);
+	putText(src_clone, "src_clone", Point(10, 30), 2, 1.0, Scalar::all(0));
+	imshow("src_clone", src_clone);
+
+	putText(edge, "edge", Point(10, 30), 2, 1.0, Scalar::all(255));
+	imshow("edge", edge);
+
+	waitKey();
 	destroyAllWindows();
-
-
-	//Mat mat1;
-
-	//mat1 = imread("C:\\Users\\HYEON-desk\\Pictures\\nucleo_f302r8_morpho_right_2017_3_23.png");
-
-	//if (mat1.empty())
-	//{
-	//	cout << "image load failed\n";
-	//}
-	//else
-	//{
-	//	imshow("image", mat1);
-	//	waitKey();
-	//}
-
-
-
-	system("pause");
+	//system("pause");
 	return 0;
+}
+
+int edge_param1 = 0;
+int edge_param2 = 0;
+
+void apply_edge_window(Mat *src)
+{
+	stringstream ss1;
+	ss1 << "param1 - ";
+	ss1 << edge_param1;
+
+	stringstream ss2;
+	ss2 << "param2 - ";
+	ss2 << edge_param2;
+
+	Mat edge;
+	Canny(*src, edge, (0 + edge_param1), (0 + edge_param2));
+	putText(edge, ss1.str(), Point(10, 30), 2, 1.0, Scalar::all(255));
+	putText(edge, ss2.str(), Point(10, 60), 2, 1.0, Scalar::all(255));
+	imshow("edge", edge);
+}
+
+void on_trackbar_action1(int pos, void* userdata)
+{
+	Mat src = *(Mat*)userdata;
+	edge_param1 = pos * 20;
+	apply_edge_window(&src);
+}
+
+void on_trackbar_action2(int pos, void* userdata)
+{
+	Mat src = *(Mat*)userdata;
+	edge_param2 = pos * 20;
+	apply_edge_window(&src);
 }
