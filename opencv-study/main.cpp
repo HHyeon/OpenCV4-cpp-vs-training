@@ -19,6 +19,7 @@ int edge_param2 = 700;
 int trackbar_pos_scale = 20;
 
 #define window_name_edge "edge"
+#define window_name_edge_with_line "edgeline"
 #define window_name_src "src_clone"
 
 std::string GetCurrentDirectory()
@@ -76,7 +77,6 @@ int main()
 		switch (ch)
 		{
 		case ' ':
-			apply_houghlines(&src);
 			break;
 		}
 	}
@@ -89,7 +89,8 @@ int main()
 void apply_houghlines(Mat *src)
 {
 	Mat edge;
-	Canny((*src), edge, edge_param1, edge_param2);
+	(*src).copyTo(edge);
+	//Canny((*src), edge, edge_param1, edge_param2);
 
 	vector<Vec4i> lines;
 	HoughLinesP(edge, lines, 1, CV_PI / 180, 160, 50, 5);
@@ -103,7 +104,7 @@ void apply_houghlines(Mat *src)
 	ss << "lines.size() : " << lines.size();
 
 	putText(edge, ss.str(), Point(10, 30), 2, 1.0, Scalar::all(255));
-	imshow(window_name_edge, edge);
+	imshow(window_name_edge_with_line, edge);
 }
 
 void apply_edge_window(Mat *src)
@@ -118,6 +119,7 @@ void apply_edge_window(Mat *src)
 
 	Mat edge;
 	Canny(*src, edge, edge_param1, edge_param2);
+	apply_houghlines(&edge);
 	putText(edge, ss1.str(), Point(10, 30), 2, 1.0, Scalar::all(255));
 	putText(edge, ss2.str(), Point(10, 60), 2, 1.0, Scalar::all(255));
 	imshow(window_name_edge, edge);
